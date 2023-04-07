@@ -13,12 +13,12 @@ class SongService {
   async addSong (data) {
     const id = 'song-' + nanoid(16)
     const { title, year, performer, genre, duration, albumId } = data
-    const createdAt = new Date().toISOString()
-    const updatedAt = createdAt
+    const date = new Date().toISOString()
 
-    const query = `INSERT INTO songs VALUES('${id}', '${title}', ${year}, '${performer}', '${genre}', ${duration}, '${albumId}', '${createdAt}', '${updatedAt}') RETURNING id`
+    const albumIdNull = albumId ? `'${albumId}'` : null
+    const queryString = `INSERT INTO songs VALUES('${id}', '${title}', ${year}, '${performer}', '${genre}', ${duration}, ${albumIdNull}, '${date}', '${date}') RETURNING id`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
     if (!result.rows[0].id) {
       throw new InvariantError('Cannot add a Song')
@@ -47,11 +47,11 @@ class SongService {
   }
 
   async getSongById (id) {
-    const query = `SELECT id, title, year, performer, genre, duration, album_id FROM songs WHERE id = '${id}'`
+    const queryString = `SELECT id, title, year, performer, genre, duration, album_id FROM songs WHERE id = '${id}'`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Song not found')
     }
 
@@ -62,11 +62,12 @@ class SongService {
     const { title, year, performer, genre, duration, albumId } = data
     const updatedAt = new Date().toISOString()
 
-    const query = `UPDATE songs SET title = '${title}', year = ${year}, performer = '${performer}', genre = '${genre}', duration = ${duration}, album_id = '${albumId}', updated_at = '${updatedAt}' WHERE id = '${id}' RETURNING id`
+    const albumIdNull = albumId ? `'${albumId}'` : null
+    const queryString = `UPDATE songs SET title = '${title}', year = '${year}', performer = '${performer}', genre = '${genre}', duration = '${duration}', album_id = ${albumIdNull}, updated_at = '${updatedAt}' WHERE id = '${id}' RETURNING id`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Song Id not found')
     }
 
@@ -74,15 +75,23 @@ class SongService {
   }
 
   async deleteSongById (id) {
-    const query = `DELETE FROM songs WHERE id = '${id}' RETURNING id`
+    const queryString = `DELETE FROM songs WHERE id = '${id}' RETURNING id`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Song Id not found')
     }
 
     return true
+  }
+
+  async checkSong (songId) {
+    const queryString = `SELECT id FROM songs WHERE id = '${songId}'`
+
+    const { rowCount } = await this._pool.query(queryString)
+
+    return rowCount
   }
 };
 

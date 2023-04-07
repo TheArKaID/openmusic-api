@@ -13,12 +13,11 @@ class AlbumService {
   async addAlbum (data) {
     const id = 'album-' + nanoid(16)
     const { name, year } = data
-    const createdAt = new Date().toISOString()
-    const updatedAt = createdAt
+    const date = new Date().toISOString()
 
-    const query = `INSERT INTO albums VALUES('${id}', '${name}', ${year}, '${createdAt}', '${updatedAt}') RETURNING id`
+    const queryString = `INSERT INTO albums VALUES('${id}', '${name}', ${year}, '${date}', '${date}') RETURNING id`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
     if (!result.rows[0].id) {
       throw new InvariantError('Cannot add an Album')
@@ -31,18 +30,18 @@ class AlbumService {
 
     const album = await this._pool.query(queryAlbum)
 
-    if (!album.rows.length) {
+    if (!album.rowCount) {
       throw new NotFoundError('Album not found')
     }
 
     const querySong = `SELECT songs.id, songs.title, songs.performer FROM albums JOIN songs ON albums.id = songs.album_id WHERE albums.id = '${id}'`
 
-    const songs = await this._pool.query(querySong)
+    const { rows: songs } = await this._pool.query(querySong)
 
     return {
       album: {
         ...album.rows[0],
-        songs: songs.rows
+        songs
       }
     }
   }
@@ -51,11 +50,11 @@ class AlbumService {
     const { name, year } = data
     const updatedAt = new Date().toISOString()
 
-    const query = `UPDATE albums SET name = '${name}', year = ${year}, updated_at = '${updatedAt}' WHERE id = '${id}' RETURNING id`
+    const queryString = `UPDATE albums SET name = '${name}', year = '${year}', updated_at = '${updatedAt}' WHERE id = '${id}' RETURNING id`
 
-    const result = await this._pool.query(query)
+    const result = await this._pool.query(queryString)
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Failed. Album Id not found')
     }
 
@@ -63,10 +62,10 @@ class AlbumService {
   }
 
   async deleteAlbumById (id) {
-    const query = `DELETE FROM albums WHERE id = '${id}' RETURNING id`
-    const result = await this._pool.query(query)
+    const queryString = `DELETE FROM albums WHERE id = '${id}' RETURNING id`
+    const result = await this._pool.query(queryString)
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Albun Id not found')
     }
 

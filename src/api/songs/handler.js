@@ -1,10 +1,13 @@
 import SongService from '../../services/SongService.js'
 import SongValidator from '../../validator/songs/index.js'
+import autoBind from 'auto-bind'
 
 class SongHandler {
   constructor () {
     this._service = new SongService()
     this._validator = new SongValidator()
+
+    autoBind(this)
   }
 
   async postSongHandler (request, h) {

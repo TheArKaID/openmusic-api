@@ -1,8 +1,13 @@
 import * as dotenv from 'dotenv'
 import { server as _server } from '@hapi/hapi'
+import jwt from '@hapi/jwt'
 import ClientError from './exceptions/ClientError.js'
 import albums from './api/albums/index.js'
 import songs from './api/songs/index.js'
+import users from './api/users/index.js'
+import authentications from './api/authentications/index.js'
+import playlists from './api/playlists/index.js'
+import collaborations from './api/collaborations/index.js'
 
 dotenv.config()
 const init = async () => {
@@ -16,9 +21,33 @@ const init = async () => {
     }
   })
 
+  await server.register(jwt)
+
+  server.auth.strategy('jwt_auth', 'jwt', {
+    keys: process.env.JWT_SECRET_ACCESS,
+    verify: {
+      aud: false,
+      iss: false,
+      sub: false,
+      maxAgeSec: process.env.JWT_MAX_AGE
+    },
+    validate: (artifacts) => {
+      return {
+        isValid: true,
+        Credentials: {
+          id: artifacts.decoded.payload.id
+        }
+      }
+    }
+  })
+
   await server.register([
     albums,
-    songs
+    songs,
+    users,
+    authentications,
+    playlists,
+    collaborations
   ])
 
   server.ext('onPreResponse', (request, h) => {
@@ -35,7 +64,7 @@ const init = async () => {
           message: response.message
         }
       } else if (!response.isServer) {
-        errCode = response.statusCode ?? 400
+        errCode = response.output.statusCode ?? 400
         errRes = {
           status: 'fail',
           message: response.message
@@ -46,6 +75,7 @@ const init = async () => {
           message: 'Server Cannot Process Your Request'
         }
         if (process.env.NODE_ENV === 'development') {
+          console.log(response.message)
           errRes.data = response.message
         }
       }

@@ -1,32 +1,32 @@
-import SongHandler from './handler.js'
+import Handler from './handler.js'
 
-const handler = new SongHandler()
+const handler = new Handler()
 
 const routes = () => [
   {
     method: 'POST',
     path: '/songs',
-    handler: (request, h) => handler.postSongHandler(request, h)
+    handler: handler.postSongHandler
   },
   {
     method: 'GET',
     path: '/songs',
-    handler: (request, h) => handler.getSongsHandler(request, h)
+    handler: handler.getSongsHandler
   },
   {
     method: 'GET',
     path: '/songs/{id}',
-    handler: (request, h) => handler.getSongByIdHandler(request, h)
+    handler: handler.getSongByIdHandler
   },
   {
     method: 'PUT',
     path: '/songs/{id}',
-    handler: (request, h) => handler.editSongHandler(request, h)
+    handler: handler.editSongHandler
   },
   {
     method: 'DELETE',
     path: '/songs/{id}',
-    handler: (request, h) => handler.deleteSongHandler(request, h)
+    handler: handler.deleteSongHandler
   }
 ]
 

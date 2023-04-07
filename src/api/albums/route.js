@@ -1,27 +1,27 @@
-import AlbumHandler from './handler.js'
+import Handler from './handler.js'
 
-const handler = new AlbumHandler()
+const handler = new Handler()
 
 const routes = () => [
   {
     method: 'POST',
     path: '/albums',
-    handler: (request, h) => handler.postAlbumHandler(request, h)
+    handler: handler.postAlbumHandler
   },
   {
     method: 'GET',
     path: '/albums/{id}',
-    handler: (request, h) => handler.getAlbumByIdHandler(request, h)
+    handler: handler.getAlbumByIdHandler
   },
   {
     method: 'PUT',
     path: '/albums/{id}',
-    handler: (request, h) => handler.editAlbumHandler(request, h)
+    handler: handler.editAlbumHandler
   },
   {
     method: 'DELETE',
     path: '/albums/{id}',
-    handler: (request, h) => handler.deleteAlbumHandler(request, h)
+    handler: handler.deleteAlbumHandler
   }
 ]
 

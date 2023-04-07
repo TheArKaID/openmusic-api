@@ -1,10 +1,13 @@
 import AlbumService from '../../services/AlbumService.js'
 import AlbumValidator from '../../validator/albums/index.js'
+import autoBind from 'auto-bind'
 
 class AlbumHandler {
   constructor () {
     this._service = new AlbumService()
     this._validator = new AlbumValidator()
+
+    autoBind(this)
   }
 
   async postAlbumHandler (request, h) {

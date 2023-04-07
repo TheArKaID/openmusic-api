@@ -22,6 +22,27 @@ const routes = () => [
     method: 'DELETE',
     path: '/albums/{id}',
     handler: handler.deleteAlbumHandler
+  },
+  {
+    method: 'POST',
+    path: '/albums/{id}/likes',
+    handler: handler.postAlbumLikeHandler,
+    options: {
+      auth: 'jwt_auth'
+    }
+  },
+  {
+    method: 'GET',
+    path: '/albums/{id}/likes',
+    handler: handler.getAlbumLikesByIdHandler
+  },
+  {
+    method: 'DELETE',
+    path: '/albums/{id}/likes',
+    handler: handler.deleteAlbumLikeHandler,
+    options: {
+      auth: 'jwt_auth'
+    }
   }
 ]
 

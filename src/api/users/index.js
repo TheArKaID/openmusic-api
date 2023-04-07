@@ -2,7 +2,7 @@ import routes from './route.js'
 
 const name = 'users'
 const version = '1.0.0'
-async function register (server) {
+const register = async (server) => {
   server.route(routes())
 }
 

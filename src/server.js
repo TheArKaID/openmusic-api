@@ -1,19 +1,21 @@
-import * as dotenv from 'dotenv'
 import { server as _server } from '@hapi/hapi'
 import jwt from '@hapi/jwt'
+import Inert from '@hapi/inert'
 import ClientError from './exceptions/ClientError.js'
 import albums from './api/albums/index.js'
 import songs from './api/songs/index.js'
 import users from './api/users/index.js'
 import authentications from './api/authentications/index.js'
-import playlists from './api/playlists/index.js'
 import collaborations from './api/collaborations/index.js'
+import playlists from './api/playlists/index.js'
+import exports from './api/exports/index.js'
+import uploads from './api/uploads/index.js'
+import config from './utils/config.js'
 
-dotenv.config()
 const init = async () => {
   const server = _server({
-    host: process.env.HOST || 'localhost',
-    port: process.env.PORT || 6071,
+    host: config.app.host,
+    port: config.app.port,
     routes: {
       cors: {
         origin: ['*']
@@ -21,15 +23,15 @@ const init = async () => {
     }
   })
 
-  await server.register(jwt)
+  await server.register([jwt, Inert])
 
   server.auth.strategy('jwt_auth', 'jwt', {
-    keys: process.env.JWT_SECRET_ACCESS,
+    keys: config.jwt.accessKey,
     verify: {
       aud: false,
       iss: false,
       sub: false,
-      maxAgeSec: process.env.JWT_MAX_AGE
+      maxAgeSec: config.jwt.maxAge
     },
     validate: (artifacts) => {
       return {
@@ -47,7 +49,9 @@ const init = async () => {
     users,
     authentications,
     playlists,
-    collaborations
+    collaborations,
+    exports,
+    uploads
   ])
 
   server.ext('onPreResponse', (request, h) => {
@@ -74,8 +78,8 @@ const init = async () => {
           status: 'error',
           message: 'Server Cannot Process Your Request'
         }
-        if (process.env.NODE_ENV === 'development') {
-          console.log(response.message)
+        if (config.app.env === 'development') {
+          console.log(response.stack)
           errRes.data = response.message
         }
       }

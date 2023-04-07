@@ -1,0 +1,36 @@
+import { createClient } from 'redis'
+import config from '../utils/config.js'
+
+class CacheService {
+  constructor () {
+    this._client = createClient({
+      socket: {
+        host: config.redis.server
+      }
+    })
+
+    this._client.on('error', (error) => {
+      console.error(error)
+    })
+
+    this._client.connect()
+  }
+
+  async set (key, value, expirationInSecond = 1800) {
+    await this._client.set(key, value, {
+      EX: expirationInSecond
+    })
+  }
+
+  async get (key) {
+    const result = await this._client.get(key)
+
+    return result
+  }
+
+  async delete (key) {
+    return this._client.del(key)
+  }
+}
+
+export default CacheService
